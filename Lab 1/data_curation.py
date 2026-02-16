@@ -15,31 +15,23 @@ for file_name in DATASETS:
     df = pd.read_csv(file_name, low_memory=False)
     print("Initial size:", len(df))
 
-    # -----------------------------
     # Build sequence
-    # -----------------------------
     seq_cols = [c for c in df.columns if c.startswith("P") and c[1:].isdigit()]
     seq_cols = sorted(seq_cols, key=lambda x: int(x[1:]))
 
     df[seq_cols] = df[seq_cols].astype(str)
     df["FullSeq"] = df[seq_cols].agg("".join, axis=1)
 
-    # -----------------------------
     # Remove exact duplicates
-    # -----------------------------
     df = df.drop_duplicates(subset=seq_cols).reset_index(drop=True)
     print("After exact dedup:", len(df))
 
-    # -----------------------------
     # Remove rows with no resistance values
-    # -----------------------------
     numeric_cols = df.select_dtypes(include="number").columns
     df = df.dropna(subset=numeric_cols, how="all")
     print("After phenotype filtering:", len(df))
 
-    # -----------------------------
     # Identity filtering
-    # -----------------------------
     if file_name != "INI.csv":   # Apply only to PI, NRTI, NNRTI
 
         threshold = 0.95
